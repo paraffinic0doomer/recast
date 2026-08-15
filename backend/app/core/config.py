@@ -1,0 +1,59 @@
+from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+STORAGE_DIR = BASE_DIR / "storage"
+UPLOADS_DIR = STORAGE_DIR / "uploads"
+AUDIO_DIR = STORAGE_DIR / "audio"
+CLIPS_DIR = STORAGE_DIR / "clips"
+THUMBNAILS_DIR = STORAGE_DIR / "thumbnails"
+
+_PLACEHOLDER_KEYS = {"", "sk-your-key-here"}
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    openai_api_key: str = ""
+    openai_transcription_model: str = "whisper-1"
+    # "auto" | "local" | "openai" -- see services/transcription_service.py
+    transcription_backend: str = "auto"
+    whisper_model_size: str = "base"
+    whisper_compute_type: str = "int8"
+
+    # Content analysis: "auto" | "groq" | "local" (Ollama) | "openai"
+    analysis_backend: str = "auto"
+    groq_api_key: str = ""
+    groq_analysis_model: str = "llama-3.3-70b-versatile"
+    groq_transcription_model: str = "whisper-large-v3-turbo"
+    ollama_host: str = "http://localhost:11434"
+    ollama_model: str = "llama3.2:3b"
+    ollama_timeout: float = 300.0
+    openai_analysis_model: str = "gpt-4o-mini"
+    # Empty = no image generation backend; thumbnails ship as render-ready specs
+    # over real extracted frames. Set when an image API is wired up.
+    image_generation_backend: str = ""
+
+    database_url: str = f"sqlite:///{STORAGE_DIR / 'recast.db'}"
+    cors_origins: str = "http://localhost:3000"
+    ffmpeg_bin: str = "ffmpeg"
+    ffprobe_bin: str = "ffprobe"
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def openai_configured(self) -> bool:
+        return self.openai_api_key.strip() not in _PLACEHOLDER_KEYS
+
+    @property
+    def groq_configured(self) -> bool:
+        return bool(self.groq_api_key.strip())
+
+
+settings = Settings()
+
+for directory in (STORAGE_DIR, UPLOADS_DIR, AUDIO_DIR, CLIPS_DIR, THUMBNAILS_DIR):
+    directory.mkdir(parents=True, exist_ok=True)
