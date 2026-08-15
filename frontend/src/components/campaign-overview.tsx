@@ -80,7 +80,7 @@ export function CampaignOverview({
                 <p className="text-xl font-semibold leading-none tabular-nums text-foreground">
                   {step.count}
                 </p>
-                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                <p className="text-[0.6875rem] font-medium uppercase tracking-wider text-muted-foreground">
                   {step.label}
                 </p>
               </div>

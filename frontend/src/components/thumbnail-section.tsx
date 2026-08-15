@@ -89,7 +89,7 @@ function ThumbnailPreview({ concept }: { concept: ThumbnailConcept }) {
       </div>
 
       {concept.timestamp != null && (
-        <span className="absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 font-mono text-[10px] text-white">
+        <span className="absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 font-mono text-[0.6875rem] text-white">
           frame @ {Math.floor(concept.timestamp / 60)}:
           {String(Math.floor(concept.timestamp % 60)).padStart(2, "0")}
         </span>
@@ -115,7 +115,7 @@ export function ThumbnailSection({
     <Card>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <ImageIcon className="size-4" />
             Thumbnail Concepts
             {concepts.length > 0 && (
@@ -138,7 +138,7 @@ export function ThumbnailSection({
           </Button>
         </div>
         {!imageGenerationAvailable && concepts.length > 0 && (
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Previews compose your real video frames with each concept&apos;s
             headline and placement — no image model is configured.
           </p>
@@ -169,7 +169,7 @@ export function ThumbnailSection({
 
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <span className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
                       Headline
                     </span>
                     <p className="text-sm font-semibold leading-snug text-foreground">
@@ -181,7 +181,7 @@ export function ThumbnailSection({
 
                 <div className="space-y-2.5 text-sm">
                   <div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <span className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
                       Visual concept
                     </span>
                     <p className="leading-relaxed text-muted-foreground">
@@ -202,7 +202,7 @@ export function ThumbnailSection({
 
                   {concept.why_it_works && (
                     <div>
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      <span className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
                         Why it attracts attention
                       </span>
                       <p className="leading-relaxed text-muted-foreground">
@@ -214,10 +214,10 @@ export function ThumbnailSection({
 
                 {concept.recommended_use_case && (
                   <div className="mt-auto rounded-lg bg-muted/50 px-3 py-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <span className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
                       Recommended use
                     </span>
-                    <p className="text-xs leading-relaxed text-foreground">
+                    <p className="text-sm leading-relaxed text-foreground">
                       {concept.recommended_use_case}
                     </p>
                   </div>

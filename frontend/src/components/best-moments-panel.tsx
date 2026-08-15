@@ -86,24 +86,24 @@ export function BestMomentsPanel({
     <Card>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Flame className="size-4" />
             Best Moments
           </CardTitle>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             {moments.length} clip-worthy {moments.length === 1 ? "moment" : "moments"}
           </span>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5">
         {moments.map((moment, index) => {
           const hasClip = generatedMomentIds?.has(moment.id) ?? false;
           const isGenerating = generatingMomentId === moment.id;
           return (
             <div
               key={`${moment.start}-${moment.end}`}
-              className="rounded-xl border bg-card p-5"
+              className="rounded-xl border bg-card p-6"
             >
               {/* header: rank, title, timecode, score */}
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -160,7 +160,7 @@ export function BestMomentsPanel({
               {/* reason */}
               {moment.reason && (
                 <div className="mt-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Why this works
                   </p>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">

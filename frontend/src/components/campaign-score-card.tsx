@@ -95,7 +95,7 @@ function ScoreDial({ score }: { score: number }) {
         <span className="text-3xl font-semibold leading-none tabular-nums text-foreground">
           {score}
         </span>
-        <span className="text-xs text-muted-foreground">/ 100</span>
+        <span className="text-sm text-muted-foreground">/ 100</span>
       </div>
     </div>
   );
@@ -145,7 +145,7 @@ export function CampaignScoreCard({
     <Card>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Gauge className="size-4" />
             Campaign Score
           </CardTitle>
@@ -180,18 +180,18 @@ export function CampaignScoreCard({
                 : "Generate a campaign first, then it can be evaluated."}
             </p>
             {completenessScore != null && (
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Completeness score: {completenessScore}/100
               </p>
             )}
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* headline */}
             <div className="flex flex-wrap items-center gap-6">
               <ScoreDial score={evaluation.overall} />
               <div className="min-w-[12rem] flex-1 space-y-1.5">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Overall
                 </p>
                 <p className={cn("text-lg font-semibold", tone(evaluation.overall).text)}>
@@ -213,7 +213,7 @@ export function CampaignScoreCard({
             <Separator />
 
             {/* dimensions */}
-            <div className="grid grid-cols-1 gap-x-8 gap-y-3.5 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-10 gap-y-5 sm:grid-cols-2">
               {DIMENSIONS.map(({ key, label }) => (
                 <DimensionBar
                   key={key}
@@ -250,7 +250,7 @@ export function CampaignScoreCard({
                             )}
                             <Badge
                               className={cn(
-                                "text-[10px] font-medium uppercase",
+                                "text-[0.6875rem] font-medium uppercase",
                                 PRIORITY_STYLES[item.priority] ?? PRIORITY_STYLES.medium,
                               )}
                             >

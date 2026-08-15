@@ -1,6 +1,9 @@
+from functools import lru_cache
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from app.core.key_pool import KeyPool
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 STORAGE_DIR = BASE_DIR / "storage"
@@ -8,6 +11,7 @@ UPLOADS_DIR = STORAGE_DIR / "uploads"
 AUDIO_DIR = STORAGE_DIR / "audio"
 CLIPS_DIR = STORAGE_DIR / "clips"
 THUMBNAILS_DIR = STORAGE_DIR / "thumbnails"
+GROQ_KEYS_FILE = BASE_DIR / "groq_keys.txt"
 
 _PLACEHOLDER_KEYS = {"", "sk-your-key-here"}
 
@@ -25,6 +29,10 @@ class Settings(BaseSettings):
     # Content analysis: "auto" | "groq" | "local" (Ollama) | "openai"
     analysis_backend: str = "auto"
     groq_api_key: str = ""
+    # Comma-separated alternative to groq_keys.txt
+    groq_api_keys: str = ""
+    # Optional extra keys file, e.g. one kept outside the repo
+    groq_keys_file: str = ""
     groq_analysis_model: str = "llama-3.3-70b-versatile"
     groq_transcription_model: str = "whisper-large-v3-turbo"
     ollama_host: str = "http://localhost:11434"
@@ -50,10 +58,22 @@ class Settings(BaseSettings):
 
     @property
     def groq_configured(self) -> bool:
-        return bool(self.groq_api_key.strip())
+        return groq_key_pool().configured
 
 
 settings = Settings()
 
 for directory in (STORAGE_DIR, UPLOADS_DIR, AUDIO_DIR, CLIPS_DIR, THUMBNAILS_DIR):
     directory.mkdir(parents=True, exist_ok=True)
+
+
+@lru_cache(maxsize=1)
+def groq_key_pool() -> KeyPool:
+    """Shared rotating pool of Groq keys (built once per process)."""
+    extra = [Path(settings.groq_keys_file)] if settings.groq_keys_file.strip() else []
+    return KeyPool.from_sources(
+        keys_file=GROQ_KEYS_FILE,
+        keys_csv=settings.groq_api_keys,
+        single_key=settings.groq_api_key,
+        extra_files=extra,
+    )

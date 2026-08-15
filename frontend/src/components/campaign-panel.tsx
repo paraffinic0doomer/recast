@@ -115,7 +115,7 @@ function Field({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {label}
         </span>
         <div className="flex items-center gap-2">
@@ -148,7 +148,7 @@ function TagRow({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {label}
           <span className="ml-1.5 font-normal normal-case tracking-normal">
             ({items.length})
@@ -190,7 +190,7 @@ export function CampaignPanel({
     <Card>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Megaphone className="size-4" />
             Campaign
             {generatedCount > 0 && (
@@ -208,7 +208,7 @@ export function CampaignPanel({
                     /100
                   </span>
                 </div>
-                <p className="mt-0.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                <p className="mt-0.5 text-[0.6875rem] uppercase tracking-wider text-muted-foreground">
                   Campaign score
                 </p>
               </div>
@@ -249,7 +249,7 @@ export function CampaignPanel({
           </div>
         ) : (
           <Tabs defaultValue="youtube">
-            <TabsList className="mb-5 flex w-full flex-wrap">
+            <TabsList className="mb-6 flex w-full flex-wrap">
               {PLATFORMS.map(({ key, label, icon: Icon, accent }) => (
                 <TabsTrigger key={key} value={key} className="gap-1.5">
                   <Icon className={cn("size-3.5", accent)} />
@@ -263,7 +263,7 @@ export function CampaignPanel({
               const busy = generatingPlatform === key;
 
               return (
-                <TabsContent key={key} value={key} className="space-y-5">
+                <TabsContent key={key} value={key} className="space-y-6">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm text-muted-foreground">
                       {content
@@ -292,7 +292,7 @@ export function CampaignPanel({
                       {key === "youtube" && campaign.youtube && (
                         <>
                           <div className="space-y-1.5">
-                            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                               Title options
                             </span>
                             <div className="space-y-2">
@@ -325,7 +325,7 @@ export function CampaignPanel({
                           {campaign.youtube.chapters.length > 0 && (
                             <div className="space-y-1.5">
                               <div className="flex items-center justify-between gap-2">
-                                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                   Chapters
                                 </span>
                                 <CopyButton
@@ -432,7 +432,7 @@ export function CampaignPanel({
                           {campaign.x.thread.length > 0 && (
                             <div className="space-y-1.5">
                               <div className="flex items-center justify-between gap-2">
-                                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                   Thread
                                   <span className="ml-1.5 font-normal normal-case tracking-normal">
                                     ({campaign.x.thread.length} posts)
@@ -470,7 +470,7 @@ export function CampaignPanel({
                       )}
 
                       <Separator />
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         Generated from this video&apos;s Content DNA — written
                         specifically for {label}, not reused across platforms.
                       </p>

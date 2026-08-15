@@ -49,7 +49,7 @@ function AttributeTile({
         >
           <Icon className="size-3.5" />
         </div>
-        <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {label}
         </span>
       </div>
@@ -134,19 +134,19 @@ export function ContentDnaView({ dna, onSeek }: ContentDnaViewProps) {
     <Card>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Dna className="size-4" />
             Content DNA
           </CardTitle>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             Source of truth for all generated content
           </span>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-7">
+      <CardContent className="space-y-8">
         {/* Top attribute tiles */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <AttributeTile
             icon={Film}
             label="Content Type"
@@ -178,7 +178,7 @@ export function ContentDnaView({ dna, onSeek }: ContentDnaViewProps) {
           <div className="rounded-xl border-l-2 border-primary bg-muted/40 px-5 py-4">
             <div className="flex items-center gap-1.5">
               <Quote className="size-3.5 text-muted-foreground" />
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Core Message
               </span>
             </div>
@@ -195,7 +195,7 @@ export function ContentDnaView({ dna, onSeek }: ContentDnaViewProps) {
               <Megaphone className="size-3.5" />
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Call to Action
               </p>
               <p className="mt-1 text-sm text-foreground">{dna.cta}</p>
@@ -203,7 +203,7 @@ export function ContentDnaView({ dna, onSeek }: ContentDnaViewProps) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-7 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <ChipSection
             icon={Tag}
             title="Key Topics"
@@ -239,7 +239,7 @@ export function ContentDnaView({ dna, onSeek }: ContentDnaViewProps) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-7 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <ListSection
             icon={ListChecks}
             title="Key Points"

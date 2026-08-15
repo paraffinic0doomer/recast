@@ -72,7 +72,7 @@ export function TranscriptPanel({
     <Card>
       <CardHeader className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <FileText className="size-4" />
             Transcript
           </CardTitle>

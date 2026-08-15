@@ -6,7 +6,7 @@ Upload one video. RECAST transcribes it, works out what it is actually about,
 finds the moments worth clipping, renders real vertical shorts, and writes
 native copy for six platforms — in about a minute.
 
-<!-- Screenshot: finished project page with the "Campaign ready" banner -->
+![RECAST campaign ready](docs/screenshots/02-overview.png)
 
 ---
 
@@ -60,6 +60,55 @@ video, so the campaign stays internally consistent.
 | **Platform-specific adaptation** | Every platform has its own spec for tone, length, structure, hook strategy and CTA strategy, validated against real limits (X 280 chars, YouTube title 100, per-platform hashtag caps). |
 | **Campaign scoring** | An AI evaluator grades content quality, platform adaptation, hook strength, source consistency, SEO and CTA, and returns prioritised, concrete improvements. |
 | **Thumbnail concepts** | Three distinct concepts with headline, visual concept, subject placement, emotional angle and recommended use case, previewed over real frames from the video. |
+
+## Screenshots
+
+**One video becomes a campaign.** The summary tracks what has been produced, and
+the funnel counts real deliverables.
+
+![Project overview](docs/screenshots/02-overview.png)
+
+**A progress timeline in plain language** — no pipeline jargon.
+
+![Progress timeline](docs/screenshots/03-progress.png)
+
+**Six platforms, written natively.** YouTube gets three title angles, a
+search-shaped description, real chapters and SEO keywords:
+
+![YouTube campaign](docs/screenshots/04-campaign-youtube.png)
+
+The same video on **TikTok** — terse, lowercase, curiosity-led:
+
+![TikTok campaign](docs/screenshots/05-campaign-tiktok.png)
+
+...and on **LinkedIn** — professional register, peer-discussion CTA. Same source
+of truth, deliberately different voice:
+
+![LinkedIn campaign](docs/screenshots/06-campaign-linkedin.png)
+
+**The campaign grades itself** across six dimensions and says what to fix:
+
+![Campaign score](docs/screenshots/07-campaign-score.png)
+
+**Real vertical shorts**, cut with FFmpeg and playable in the browser:
+
+![Generated shorts](docs/screenshots/08-shorts.png)
+
+**Moments are scored, not guessed** — with the reasoning shown:
+
+![Best moments](docs/screenshots/09-best-moments.png)
+
+**Three thumbnail concepts**, each composed over a real frame from the video:
+
+![Thumbnail concepts](docs/screenshots/10-thumbnails.png)
+
+**Content DNA** — the single source of truth every output is built from:
+
+![Content DNA](docs/screenshots/11-content-dna.png)
+
+**Searchable transcript** with click-to-seek:
+
+![Transcript](docs/screenshots/12-transcript.png)
 
 ## Tech Stack
 
@@ -209,7 +258,7 @@ Set in `backend/.env` — never committed, never sent to the browser.
 
 | Variable | Required | Default | Purpose |
 |----------|----------|---------|---------|
-| `GROQ_API_KEY` | **Yes** | — | Transcription, Content DNA, moments, campaign, scoring |
+| `GROQ_API_KEY` | **Yes*** | — | Transcription, Content DNA, moments, campaign, scoring |
 | `TRANSCRIPTION_BACKEND` | No | `groq` | `groq` · `local` · `openai` · `auto` |
 | `ANALYSIS_BACKEND` | No | `groq` | `groq` · `local` · `openai` · `auto` |
 | `GROQ_ANALYSIS_MODEL` | No | `llama-3.3-70b-versatile` | Reasoning model |
@@ -222,12 +271,37 @@ Set in `backend/.env` — never committed, never sent to the browser.
 | `CORS_ORIGINS` | No | `http://localhost:3000` | Allowed frontend origins |
 | `FFMPEG_BIN` / `FFPROBE_BIN` | No | `ffmpeg` / `ffprobe` | Override if not on PATH |
 
+\* Or list several keys in `backend/groq_keys.txt` — see below.
+
+### Multiple keys (recommended)
+
+Groq's free tier caps **tokens per day per key**. Put one key per line in
+`backend/groq_keys.txt` and RECAST rotates through them automatically: when a
+key hits its limit, the next one takes over mid-request. Three keys means three
+times the daily budget.
+
+```
+# backend/groq_keys.txt — gitignored
+gsk_first_key
+gsk_second_key
+gsk_third_key
+```
+
+A key that is revoked or mistyped is retired with a clear log line rather than
+blocking every request behind it.
+
+Keys can also live outside the repo — set `GROQ_KEYS_FILE=/path/to/keys.txt` and
+those keys are merged into the pool (duplicates collapse). `GROQ_API_KEYS`
+(comma-separated) and a single `GROQ_API_KEY` remain supported as fallbacks.
+
 Frontend (`frontend/.env.local`): `NEXT_PUBLIC_API_URL`, defaulting to
 `http://localhost:8000`. This is the only client-visible variable.
 
 ## Demo
 
 A 2-minute run showing one video becoming a full campaign.
+
+![Dashboard](docs/screenshots/01-landing.png)
 
 | # | Beat | What to show | ~Time |
 |---|------|--------------|-------|
@@ -282,8 +356,9 @@ Honest about what this build does and does not do.
   shorts before presenting.
 - **Hosted transcription caps uploads at 25MB** (~25 minutes of video after FLAC
   compression). Longer videos need `TRANSCRIPTION_BACKEND=local`.
-- **Groq's free tier caps at 100k tokens/day.** Heavy repeated demoing exhausts
-  it; the app degrades gracefully rather than crashing.
+- **Groq's free tier caps tokens per day, per key.** RECAST rotates across every
+  key in `backend/groq_keys.txt`, so the ceiling scales with how many keys you
+  add — but it is still a ceiling, and the app degrades gracefully when reached.
 - **Background tasks run in-process.** Restarting the API mid-run loses that run,
   though the project is preserved and can be retried.
 - **Fewer than 3 moments** can be returned for short videos, where overlap

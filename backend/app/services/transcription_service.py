@@ -24,7 +24,8 @@ from pathlib import Path
 
 from openai import OpenAI
 
-from app.core.config import settings
+from app.core.config import groq_key_pool, settings
+from app.core.key_pool import call_with_rotation
 from app.services.media_service import MediaProcessingError, compress_audio_for_upload
 
 logger = logging.getLogger(__name__)
@@ -100,11 +101,31 @@ class OpenAIWhisperTranscriptionService(TranscriptionService):
         base_url: str | None = None,
         max_upload_bytes: int = 25 * 1024 * 1024,
         provider: str = "OpenAI",
+        key_pool=None,
     ) -> None:
-        self._client = OpenAI(api_key=api_key, base_url=base_url) if base_url else OpenAI(api_key=api_key)
+        self._api_key = api_key
+        self._base_url = base_url
         self._model = model
         self._max_upload_bytes = max_upload_bytes
         self._provider = provider
+        self._key_pool = key_pool
+        self._client = self._build_client(api_key)
+
+    def _build_client(self, api_key: str) -> OpenAI:
+        return (
+            OpenAI(api_key=api_key, base_url=self._base_url)
+            if self._base_url
+            else OpenAI(api_key=api_key)
+        )
+
+    def _request(self, api_key: str, upload_path: Path):
+        client = self._client if api_key == self._api_key else self._build_client(api_key)
+        with upload_path.open("rb") as audio_file:
+            return client.audio.transcriptions.create(
+                model=self._model,
+                file=audio_file,
+                response_format="verbose_json",
+            )
 
     def _prepare_upload(self, audio_path: Path) -> tuple[Path, bool]:
         """Compress to FLAC to fit the provider's upload cap. Returns (path, is_temp)."""
@@ -138,12 +159,14 @@ class OpenAIWhisperTranscriptionService(TranscriptionService):
                 size / 1024 / 1024,
             )
             try:
-                with upload_path.open("rb") as audio_file:
-                    response = self._client.audio.transcriptions.create(
-                        model=self._model,
-                        file=audio_file,
-                        response_format="verbose_json",
+                if self._key_pool is not None and self._key_pool.configured:
+                    response = call_with_rotation(
+                        self._key_pool,
+                        lambda key: self._request(key, upload_path),
+                        what="transcription request",
                     )
+                else:
+                    response = self._request(self._api_key, upload_path)
             except Exception as exc:  # SDK raises various APIError subclasses
                 raise TranscriptionError(
                     f"{self._provider} transcription request failed: {exc}"
@@ -222,12 +245,14 @@ class LocalWhisperTranscriptionService(TranscriptionService):
 
 
 def _groq_service() -> OpenAIWhisperTranscriptionService:
+    pool = groq_key_pool()
     return OpenAIWhisperTranscriptionService(
-        api_key=settings.groq_api_key,
+        api_key=pool.acquire() or settings.groq_api_key,
         model=settings.groq_transcription_model,
         base_url=GROQ_BASE_URL,
         max_upload_bytes=GROQ_MAX_UPLOAD_BYTES,
         provider="Groq",
+        key_pool=pool,
     )
 
 

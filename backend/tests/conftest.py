@@ -51,6 +51,31 @@ def _no_outbound_network(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def _pool_follows_settings(monkeypatch):
+    """Keep the Groq key pool derived from settings during tests.
+
+    In production the pool reads backend/groq_keys.txt. Tests must not depend on
+    (or consume) a developer's real keys, and existing tests simulate "no key"
+    by blanking settings.groq_api_key -- so here the pool is rebuilt from
+    settings on every call.
+    """
+    import app.core.config as config
+    import app.services.analysis_service as analysis_service
+    import app.services.transcription_service as transcription_service
+    from app.core.key_pool import KeyPool
+
+    def build() -> KeyPool:
+        return KeyPool.from_sources(
+            keys_csv=config.settings.groq_api_keys,
+            single_key=config.settings.groq_api_key,
+        )
+
+    monkeypatch.setattr(config, "groq_key_pool", build)
+    monkeypatch.setattr(analysis_service, "groq_key_pool", build)
+    monkeypatch.setattr(transcription_service, "groq_key_pool", build)
+
+
+@pytest.fixture(autouse=True)
 def _isolated_storage(tmp_path, monkeypatch):
     """Keep test runs out of the real storage/ directory.
 

@@ -97,7 +97,7 @@ export function ShortsSection({
     <Card>
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <CardTitle className="flex items-center gap-2 text-base">
+          <CardTitle className="flex items-center gap-2">
             <Clapperboard className="size-4" />
             Shorts
             {generatedCount > 0 && (
@@ -151,14 +151,14 @@ export function ShortsSection({
                       {isPending ? (
                         <>
                           <Loader2 className="size-6 animate-spin text-primary" />
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                             Rendering vertical clip…
                           </p>
                         </>
                       ) : (
                         <>
                           <Smartphone className="size-6 text-muted-foreground" />
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                             Not generated yet
                           </p>
                           <Button
@@ -172,7 +172,7 @@ export function ShortsSection({
                       )}
                     </div>
                   )}
-                  <span className="absolute left-2 top-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-semibold text-white">
+                  <span className="absolute left-2 top-2 rounded-md bg-black/70 px-1.5 py-0.5 text-xs font-semibold text-white">
                     #{index + 1}
                   </span>
                 </div>

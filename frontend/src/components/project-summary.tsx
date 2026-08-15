@@ -42,7 +42,18 @@ function slugify(value: string) {
   );
 }
 
-export function ProjectSummary({ project }: { project: ProjectDetail }) {
+interface ProjectSummaryProps {
+  project: ProjectDetail;
+  /** Lets the transcript highlight the segment currently playing. */
+  onTimeUpdate?: (seconds: number) => void;
+  videoRef?: React.Ref<HTMLVideoElement>;
+}
+
+export function ProjectSummary({
+  project,
+  onTimeUpdate,
+  videoRef,
+}: ProjectSummaryProps) {
   const [copied, setCopied] = useState(false);
   const stats = countCampaignStats(project);
   const isReady = project.status === "completed" && stats.platforms > 0;
@@ -87,7 +98,7 @@ export function ProjectSummary({ project }: { project: ProjectDetail }) {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-8">
         {/* Campaign ready banner */}
         {isReady && (
           <div className="flex flex-wrap items-center gap-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-5 py-4">
@@ -115,13 +126,15 @@ export function ProjectSummary({ project }: { project: ProjectDetail }) {
         )}
 
         {/* video + key facts */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(0,320px)_1fr]">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,320px)_1fr]">
           <div className="space-y-2">
             {project.video_url ? (
               <video
+                ref={videoRef}
                 controls
                 preload="metadata"
                 src={mediaUrl(project.video_url)}
+                onTimeUpdate={(e) => onTimeUpdate?.(e.currentTarget.currentTime)}
                 className="w-full rounded-lg border bg-black"
               />
             ) : (
@@ -163,7 +176,7 @@ export function ProjectSummary({ project }: { project: ProjectDetail }) {
                     { label: "Topic", value: dna.primary_topic },
                   ].map((item) => (
                     <div key={item.label} className="min-w-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
                         {item.label}
                       </p>
                       <p className="truncate text-sm font-medium text-foreground" title={item.value}>
@@ -174,7 +187,7 @@ export function ProjectSummary({ project }: { project: ProjectDetail }) {
                 </div>
                 {dna.core_message && (
                   <div className="rounded-lg border-l-2 border-primary bg-muted/40 px-4 py-2.5">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    <p className="text-[0.6875rem] font-semibold uppercase tracking-wider text-muted-foreground">
                       Core message
                     </p>
                     <p className="mt-0.5 text-sm leading-relaxed text-foreground">

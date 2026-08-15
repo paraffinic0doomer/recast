@@ -32,7 +32,7 @@ function StatTile({
         <p className="text-xl font-semibold leading-none tabular-nums text-foreground">
           {value}
         </p>
-        <p className="mt-1 text-xs text-muted-foreground">{label}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{label}</p>
       </div>
     </div>
   );
@@ -80,7 +80,7 @@ export default function Home() {
   );
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-10 px-4 py-12 sm:px-6 sm:py-16">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-10 px-4 py-12 sm:gap-12 sm:px-6 sm:py-16">
       <header className="space-y-3 text-center">
         <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <Sparkles className="size-6" />

@@ -5,13 +5,15 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Clock,
   AlertCircle,
-  Maximize2,
-  HardDrive,
+  Clapperboard,
+  Clock,
+  Dna,
+  Image as ImageIcon,
+  LayoutDashboard,
+  Megaphone,
   RotateCw,
 } from "lucide-react";
-import { StatusBadge } from "@/components/status-badge";
 import { PipelineSteps } from "@/components/pipeline-steps";
 import { TranscriptPanel } from "@/components/transcript-panel";
 import { ContentDnaView } from "@/components/content-dna-view";
@@ -23,12 +25,13 @@ import { CampaignScoreCard } from "@/components/campaign-score-card";
 import { ProjectSummary } from "@/components/project-summary";
 import { GenerateCampaignCta } from "@/components/generate-campaign-cta";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { api, ApiError, mediaUrl } from "@/lib/api";
-import { formatFileSize } from "@/lib/utils";
+import { api, ApiError } from "@/lib/api";
 import { toast } from "sonner";
+import { countCampaignStats } from "@/lib/campaign-stats";
 import type { Clip, PlatformKey, ProjectDetail } from "@/types/project";
 
 const ACTIVE_STATUSES = new Set([
@@ -38,13 +41,25 @@ const ACTIVE_STATUSES = new Set([
   "detecting_moments",
   "generating",
 ]);
-const CAMPAIGN_PLATFORMS = 6;
 const POLL_INTERVAL_MS = 2000;
 
-function formatDuration(seconds: number) {
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
+/** Small count pill shown on a tab when that section has content. */
+function TabCount({ n }: { n: number }) {
+  return (
+    <span className="ml-0.5 rounded bg-muted px-1.5 py-0.5 text-[0.6875rem] font-semibold tabular-nums text-muted-foreground">
+      {n}
+    </span>
+  );
+}
+
+/** Placeholder for a tab whose stage has not run yet. */
+function NotReadyYet({ label }: { label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed py-16 text-center">
+      <Clock className="size-5 text-muted-foreground" />
+      <p className="max-w-sm text-sm text-muted-foreground">{label}</p>
+    </div>
+  );
 }
 
 export default function ProjectPage() {
@@ -58,10 +73,16 @@ export default function ProjectPage() {
   const [generatingPlatform, setGeneratingPlatform] = useState<PlatformKey | null>(null);
   const [isGeneratingThumbs, setIsGeneratingThumbs] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
+  const [tab, setTab] = useState("overview");
   const hasTriggeredProcess = useRef(false);
   const hasTriggeredAnalysis = useRef(false);
   const hasTriggeredMoments = useRef(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Counts shown on the tabs; safe before the project loads.
+  const stats = project
+    ? countCampaignStats(project)
+    : { shorts: 0, platforms: 0, thumbnails: 0, moments: 0, assets: 0 };
 
   const refresh = useCallback(async () => {
     try {
@@ -192,6 +213,7 @@ export default function ProjectPage() {
     async (platform?: PlatformKey) => {
       if (!project) return;
       setGeneratingPlatform(platform ?? null);
+      setTab("campaign");
       try {
         await api.generateCampaign(project.id, platform);
         await refresh();
@@ -285,7 +307,7 @@ export default function ProjectPage() {
   }, []);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-12">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-8 sm:gap-10 sm:px-6 sm:py-12">
       <Link
         href="/"
         className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -311,36 +333,24 @@ export default function ProjectPage() {
 
       {project && (
         <>
-          <ProjectSummary project={project} />
-
-          {project.content_dna && !project.platform_content && (
-            <GenerateCampaignCta
-              isGenerating={project.status === "generating"}
-              onGenerate={() => handleGenerateCampaign()}
-            />
-          )}
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Progress</CardTitle>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              <PipelineSteps project={project} />
-            </CardContent>
-          </Card>
+          <ProjectSummary
+            project={project}
+            videoRef={videoRef}
+            onTimeUpdate={setCurrentTime}
+          />
 
           {project.status === "failed" && (
             <Alert variant="destructive">
               <AlertCircle className="size-4" />
-              <AlertTitle>Processing failed</AlertTitle>
+              <AlertTitle>Processing stopped</AlertTitle>
               <AlertDescription className="space-y-3">
                 <p>
                   {project.error_message ??
                     "Something went wrong while processing this video."}
                 </p>
                 <p className="text-xs opacity-80">
-                  Your video and project were preserved. You can retry without
-                  re-uploading.
+                  Your video and everything already generated were preserved.
+                  You can retry without re-uploading.
                 </p>
                 <Button
                   size="sm"
@@ -349,71 +359,137 @@ export default function ProjectPage() {
                   disabled={isRetrying}
                 >
                   <RotateCw
-                    className={`size-3.5 ${isRetrying ? "animate-spin" : ""}`}
+                    className={isRetrying ? "size-3.5 animate-spin" : "size-3.5"}
                   />
-                  {isRetrying ? "Retrying…" : "Retry processing"}
+                  {isRetrying ? "Retrying\u2026" : "Retry"}
                 </Button>
               </AlertDescription>
             </Alert>
           )}
 
-          {project.content_dna && (
-            <CampaignPanel
-              campaign={project.platform_content}
-              campaignScore={project.campaign_score}
-              isGenerating={project.status === "generating"}
-              generatingPlatform={generatingPlatform}
-              onGenerate={handleGenerateCampaign}
-            />
-          )}
+          <Tabs value={tab} onValueChange={setTab}>
+            <TabsList className="flex w-full flex-wrap">
+              <TabsTrigger value="overview" className="gap-1.5">
+                <LayoutDashboard className="size-3.5" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="campaign" className="gap-1.5">
+                <Megaphone className="size-3.5" />
+                Campaign
+                {stats.platforms > 0 && <TabCount n={stats.platforms} />}
+              </TabsTrigger>
+              <TabsTrigger value="shorts" className="gap-1.5">
+                <Clapperboard className="size-3.5" />
+                Shorts
+                {stats.shorts > 0 && <TabCount n={stats.shorts} />}
+              </TabsTrigger>
+              <TabsTrigger value="thumbnails" className="gap-1.5">
+                <ImageIcon className="size-3.5" />
+                Thumbnails
+                {stats.thumbnails > 0 && <TabCount n={stats.thumbnails} />}
+              </TabsTrigger>
+              <TabsTrigger value="source" className="gap-1.5">
+                <Dna className="size-3.5" />
+                Source
+              </TabsTrigger>
+            </TabsList>
 
-          {project.platform_content && (
-            <CampaignScoreCard
-              evaluation={project.campaign_evaluation}
-              completenessScore={project.campaign_score}
-              isEvaluating={isEvaluating}
-              onEvaluate={handleEvaluate}
-              hasCampaign={Boolean(project.platform_content)}
-            />
-          )}
+            {/* Overview \u2014 where the project is, and what to do next */}
+            <TabsContent value="overview" className="mt-6 space-y-8">
+              {project.content_dna && !project.platform_content && (
+                <GenerateCampaignCta
+                  isGenerating={project.status === "generating"}
+                  onGenerate={() => handleGenerateCampaign()}
+                />
+              )}
 
-          {project.content_dna && (
-            <ThumbnailSection
-              concepts={project.thumbnail_concepts ?? []}
-              isGenerating={isGeneratingThumbs}
-              onGenerate={handleGenerateThumbnails}
-            />
-          )}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Progress</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PipelineSteps project={project} />
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-          {project.best_moments && project.best_moments.length > 0 && (
-            <ShortsSection
-              projectId={project.id}
-              moments={project.best_moments}
-              initialClips={clips}
-            />
-          )}
+            {/* Campaign \u2014 the main output */}
+            <TabsContent value="campaign" className="mt-6 space-y-8">
+              {project.content_dna ? (
+                <>
+                  <CampaignPanel
+                    campaign={project.platform_content}
+                    campaignScore={project.campaign_score}
+                    isGenerating={project.status === "generating"}
+                    generatingPlatform={generatingPlatform}
+                    onGenerate={handleGenerateCampaign}
+                  />
+                  {project.platform_content && (
+                    <CampaignScoreCard
+                      evaluation={project.campaign_evaluation}
+                      completenessScore={project.campaign_score}
+                      isEvaluating={isEvaluating}
+                      onEvaluate={handleEvaluate}
+                      hasCampaign={Boolean(project.platform_content)}
+                    />
+                  )}
+                </>
+              ) : (
+                <NotReadyYet label="The campaign is written once RECAST has understood the video." />
+              )}
+            </TabsContent>
 
-          {project.best_moments && project.best_moments.length > 0 && (
-            <BestMomentsPanel
-              moments={project.best_moments}
-              onSeek={handleSeek}
-              generatedMomentIds={new Set(clips.map((c) => c.moment_id))}
-              generatingMomentId={generatingMomentId}
-              onGenerateShort={handleGenerateShort}
-            />
-          )}
+            {/* Shorts \u2014 clips and the moments they came from */}
+            <TabsContent value="shorts" className="mt-6 space-y-8">
+              {project.best_moments && project.best_moments.length > 0 ? (
+                <>
+                  <ShortsSection
+                    projectId={project.id}
+                    moments={project.best_moments}
+                    initialClips={clips}
+                  />
+                  <BestMomentsPanel
+                    moments={project.best_moments}
+                    onSeek={handleSeek}
+                    generatedMomentIds={new Set(clips.map((c) => c.moment_id))}
+                    generatingMomentId={generatingMomentId}
+                    onGenerateShort={handleGenerateShort}
+                  />
+                </>
+              ) : (
+                <NotReadyYet label="Best moments appear once the video has been analysed." />
+              )}
+            </TabsContent>
 
-          {project.content_dna && (
-            <ContentDnaView dna={project.content_dna} onSeek={handleSeek} />
-          )}
+            <TabsContent value="thumbnails" className="mt-6">
+              {project.content_dna ? (
+                <ThumbnailSection
+                  concepts={project.thumbnail_concepts ?? []}
+                  isGenerating={isGeneratingThumbs}
+                  onGenerate={handleGenerateThumbnails}
+                />
+              ) : (
+                <NotReadyYet label="Thumbnail concepts need the video's Content DNA first." />
+              )}
+            </TabsContent>
 
-          {project.transcript && (
-            <TranscriptPanel
-              transcript={project.transcript}
-              onSeek={handleSeek}
-              currentTime={currentTime}
-            />
-          )}
+            {/* Source \u2014 what everything else was built from */}
+            <TabsContent value="source" className="mt-6 space-y-8">
+              {project.content_dna && (
+                <ContentDnaView dna={project.content_dna} onSeek={handleSeek} />
+              )}
+              {project.transcript && (
+                <TranscriptPanel
+                  transcript={project.transcript}
+                  onSeek={handleSeek}
+                  currentTime={currentTime}
+                />
+              )}
+              {!project.content_dna && !project.transcript && (
+                <NotReadyYet label="The transcript and Content DNA appear once processing finishes." />
+              )}
+            </TabsContent>
+          </Tabs>
         </>
       )}
     </main>

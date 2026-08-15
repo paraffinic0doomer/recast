@@ -84,39 +84,40 @@
 }
 
 .dark {
-  /* Soft near-black with a faint cool tint: easier on the eyes than pure
-     neutral black, and cards stay clearly separated from the page. */
-  --background: oklch(0.178 0.006 265);
-  --foreground: oklch(0.965 0.002 265);
-  --card: oklch(0.221 0.007 265);
-  --card-foreground: oklch(0.965 0.002 265);
-  --popover: oklch(0.235 0.007 265);
-  --popover-foreground: oklch(0.965 0.002 265);
-  --primary: oklch(0.93 0.004 265);
-  --primary-foreground: oklch(0.205 0.007 265);
-  --secondary: oklch(0.285 0.008 265);
-  --secondary-foreground: oklch(0.965 0.002 265);
-  --muted: oklch(0.272 0.008 265);
-  --muted-foreground: oklch(0.735 0.012 265);
-  --accent: oklch(0.30 0.009 265);
-  --accent-foreground: oklch(0.965 0.002 265);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 11%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.58 0.01 265);
+  /* Eye-soothing dark: the page sits well above pure black and text sits below
+     pure white, so the contrast is comfortable to read for long stretches
+     instead of glaring. Cards lift clearly off the page. */
+  --background: oklch(0.215 0.010 255);
+  --foreground: oklch(0.915 0.005 255);
+  --card: oklch(0.258 0.011 255);
+  --card-foreground: oklch(0.915 0.005 255);
+  --popover: oklch(0.268 0.012 255);
+  --popover-foreground: oklch(0.915 0.005 255);
+  --primary: oklch(0.90 0.006 255);
+  --primary-foreground: oklch(0.235 0.011 255);
+  --secondary: oklch(0.315 0.013 255);
+  --secondary-foreground: oklch(0.915 0.005 255);
+  --muted: oklch(0.305 0.012 255);
+  --muted-foreground: oklch(0.735 0.015 255);
+  --accent: oklch(0.330 0.014 255);
+  --accent-foreground: oklch(0.925 0.005 255);
+  --destructive: oklch(0.68 0.17 22.5);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.62 0.015 255);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.221 0.007 265);
-  --sidebar-foreground: oklch(0.965 0.002 265);
+  --sidebar: oklch(0.258 0.011 255);
+  --sidebar-foreground: oklch(0.915 0.005 255);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.30 0.009 265);
-  --sidebar-accent-foreground: oklch(0.965 0.002 265);
-  --sidebar-border: oklch(1 0 0 / 11%);
-  --sidebar-ring: oklch(0.58 0.01 265);
+  --sidebar-accent: oklch(0.330 0.014 255);
+  --sidebar-accent-foreground: oklch(0.925 0.005 255);
+  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-ring: oklch(0.62 0.015 255);
 }
 
 @layer base {
@@ -128,5 +129,8 @@
   }
   html {
     @apply font-sans;
+    /* Nudges the whole rem-based scale up ~6% so the UI reads substantial
+       rather than cramped. Type, padding and gaps all scale together. */
+    font-size: 17px;
   }
 }

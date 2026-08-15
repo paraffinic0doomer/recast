@@ -4,6 +4,7 @@ backend/__pycache__/
 backend/**/__pycache__/
 backend/*.egg-info/
 backend/.env
+backend/groq_keys.txt
 backend/.pytest_cache/
 
 # Storage (runtime data, not source)

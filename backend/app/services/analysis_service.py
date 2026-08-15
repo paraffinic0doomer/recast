@@ -23,7 +23,8 @@ import httpx
 from openai import OpenAI
 from pydantic import ValidationError
 
-from app.core.config import settings
+from app.core.config import groq_key_pool, settings
+from app.core.key_pool import call_with_rotation
 from app.schemas.content_dna import ContentDNA
 
 logger = logging.getLogger(__name__)
@@ -210,25 +211,56 @@ class OllamaAnalysisService(AnalysisService):
 
 
 class OpenAIAnalysisService(AnalysisService):
-    """Works with any OpenAI-compatible chat completions API (OpenAI, Groq, ...)."""
+    """Works with any OpenAI-compatible chat completions API (OpenAI, Groq, ...).
 
-    def __init__(self, api_key: str, model: str, base_url: str | None = None) -> None:
-        self._client = OpenAI(api_key=api_key, base_url=base_url) if base_url else OpenAI(api_key=api_key)
+    When `key_pool` is supplied, a rate-limited key is swapped for the next one
+    automatically instead of failing the request.
+    """
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str,
+        base_url: str | None = None,
+        key_pool=None,
+    ) -> None:
+        self._api_key = api_key
+        self._base_url = base_url
         self._model = model
+        self._key_pool = key_pool
+        self._client = self._build_client(api_key)
+
+    def _build_client(self, api_key: str) -> OpenAI:
+        return (
+            OpenAI(api_key=api_key, base_url=self._base_url)
+            if self._base_url
+            else OpenAI(api_key=api_key)
+        )
+
+    def _request(self, api_key: str, prompt: str, system: str | None):
+        client = self._client if api_key == self._api_key else self._build_client(api_key)
+        return client.chat.completions.create(
+            model=self._model,
+            messages=[
+                {"role": "system", "content": system or SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.2,
+        )
 
     def complete_json(self, prompt: str, system: str | None = None) -> dict:
         logger.info("Querying model %s", self._model)
 
         try:
-            response = self._client.chat.completions.create(
-                model=self._model,
-                messages=[
-                    {"role": "system", "content": system or SYSTEM_PROMPT},
-                    {"role": "user", "content": prompt},
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.2,
-            )
+            if self._key_pool is not None and self._key_pool.configured:
+                response = call_with_rotation(
+                    self._key_pool,
+                    lambda key: self._request(key, prompt, system),
+                    what="analysis request",
+                )
+            else:
+                response = self._request(self._api_key, prompt, system)
         except Exception as exc:
             raise AnalysisError(f"Analysis request failed: {exc}") from exc
 
@@ -236,10 +268,12 @@ class OpenAIAnalysisService(AnalysisService):
 
 
 def _groq_service() -> "OpenAIAnalysisService":
+    pool = groq_key_pool()
     return OpenAIAnalysisService(
-        api_key=settings.groq_api_key,
+        api_key=pool.acquire() or settings.groq_api_key,
         model=settings.groq_analysis_model,
         base_url=GROQ_BASE_URL,
+        key_pool=pool,
     )
 
 
