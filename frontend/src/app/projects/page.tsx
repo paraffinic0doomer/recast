@@ -11,6 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useProjects } from "@/lib/use-projects";
 import { cn } from "@/lib/utils";
+import { HIDE_LIBRARY } from "@/lib/visibility";
+import { PrivateLibrary } from "@/components/private-library";
 
 type Filter = "all" | "ready" | "working" | "attention";
 
@@ -62,7 +64,9 @@ export default function ProjectsPage() {
         }
       />
 
-      {error && (
+      {HIDE_LIBRARY && <PrivateLibrary />}
+
+      {!HIDE_LIBRARY && error && (
         <Alert variant="destructive">
           <WifiOff className="size-4" />
           <AlertTitle>Backend unreachable</AlertTitle>
@@ -70,7 +74,7 @@ export default function ProjectsPage() {
         </Alert>
       )}
 
-      {projects && projects.length > 0 && (
+      {!HIDE_LIBRARY && projects && projects.length > 0 && (
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative min-w-[16rem] flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -103,7 +107,7 @@ export default function ProjectsPage() {
         </div>
       )}
 
-      {projects === null && !error && (
+      {!HIDE_LIBRARY && projects === null && !error && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-40 rounded-2xl" />
@@ -111,7 +115,7 @@ export default function ProjectsPage() {
         </div>
       )}
 
-      {projects !== null && projects.length === 0 && (
+      {!HIDE_LIBRARY && projects !== null && projects.length === 0 && (
         <EmptyState
           icon={FolderOpen}
           title="No projects yet"
@@ -124,7 +128,7 @@ export default function ProjectsPage() {
         />
       )}
 
-      {projects !== null && projects.length > 0 && visible.length === 0 && (
+      {!HIDE_LIBRARY && projects !== null && projects.length > 0 && visible.length === 0 && (
         <EmptyState
           icon={SearchX}
           title="Nothing matches"
@@ -143,7 +147,7 @@ export default function ProjectsPage() {
         />
       )}
 
-      {visible.length > 0 && (
+      {!HIDE_LIBRARY && visible.length > 0 && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((project) => (
             <ProjectCard key={project.id} project={project} />

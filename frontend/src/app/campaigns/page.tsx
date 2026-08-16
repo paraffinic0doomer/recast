@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useProjects } from "@/lib/use-projects";
 import { ScoreRing } from "@/components/score-ring";
+import { HIDE_LIBRARY } from "@/lib/visibility";
+import { PrivateLibrary } from "@/components/private-library";
 
 export default function CampaignsPage() {
   const { projects, error } = useProjects();
@@ -20,6 +22,20 @@ export default function CampaignsPage() {
   );
 
   const totalPosts = withCampaign.reduce((sum, p) => sum + p.post_count, 0);
+
+  // Hooks above run either way; only the listing is withheld.
+  if (HIDE_LIBRARY) {
+    return (
+      <Page className="space-y-8">
+        <PageHeader
+          eyebrow="Workspace"
+          title="Campaigns"
+          description="Generated campaigns live here once RECAST has written copy for your platforms."
+        />
+        <PrivateLibrary what="Campaigns" />
+      </Page>
+    );
+  }
 
   return (
     <Page className="space-y-8">

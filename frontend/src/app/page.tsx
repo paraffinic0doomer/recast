@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { api } from "@/lib/api";
+import { HIDE_LIBRARY } from "@/lib/visibility";
+import { PrivateLibrary } from "@/components/private-library";
 import type { ProjectSummary } from "@/types/project";
 
 const API_ERROR =
@@ -125,8 +127,9 @@ export default function StudioPage() {
         />
       </section>
 
-      {/* Creation statistics */}
-      {projects && projects.length > 0 && (
+      {/* Creation statistics. Hidden on a public build: the totals reveal how
+          much has been uploaded even when the library itself is not listed. */}
+      {!HIDE_LIBRARY && projects && projects.length > 0 && (
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <StatTile icon={Film} value={totals.videos} label="Videos processed" />
           <StatTile
@@ -140,6 +143,9 @@ export default function StudioPage() {
 
       {/* Recent work */}
       <section className="space-y-5">
+        {HIDE_LIBRARY && <PrivateLibrary />}
+        {!HIDE_LIBRARY && (
+        <>
         <SectionHeader
           title="Recent Projects"
           count={projects?.length}
@@ -177,6 +183,8 @@ export default function StudioPage() {
               <ProjectCard key={project.id} project={project} />
             ))}
           </div>
+        )}
+        </>
         )}
       </section>
     </Page>

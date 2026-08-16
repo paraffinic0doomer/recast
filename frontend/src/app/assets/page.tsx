@@ -11,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProjects } from "@/lib/use-projects";
 import { api, mediaUrl } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { HIDE_LIBRARY } from "@/lib/visibility";
+import { PrivateLibrary } from "@/components/private-library";
 import type { Clip, ThumbnailConcept } from "@/types/project";
 
 interface OwnedClip extends Clip {
@@ -82,10 +84,24 @@ export default function AssetsPage() {
     };
   }, [projects]);
 
+  // Hooks above run either way; only the listing is withheld.
   const busy = projects === null || assets === null;
   const clips = assets?.clips ?? [];
   const concepts = assets?.concepts ?? [];
   const total = clips.length + concepts.length;
+
+  if (HIDE_LIBRARY) {
+    return (
+      <Page className="space-y-8">
+        <PageHeader
+          eyebrow="Workspace"
+          title="Assets"
+          description="Rendered shorts and thumbnail concepts collect here."
+        />
+        <PrivateLibrary what="Assets" />
+      </Page>
+    );
+  }
 
   return (
     <Page className="space-y-8">
