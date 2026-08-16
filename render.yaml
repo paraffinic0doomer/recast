@@ -1,0 +1,56 @@
+# Render Blueprint for RECAST.
+#
+# Two services: a Dockerised FastAPI API (Docker because the pipeline needs
+# FFmpeg) and a Node web service for the Next.js frontend.
+#
+# The two URL variables are marked `sync: false` on purpose. Render has no way
+# to interpolate one service's full https URL into another's env var, and each
+# side needs the other's address, so they are filled in by hand once after the
+# first deploy. See DEPLOY.md for the order.
+
+services:
+  # ---------------------------------------------------------------- API ----
+  - type: web
+    name: recast-api
+    runtime: docker
+    plan: starter # Free has no persistent disk; see DEPLOY.md.
+    region: oregon
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    disk:
+      name: recast-storage
+      # Matches STORAGE_DIR in app/core/config.py (BASE_DIR is /app in the
+      # image), so uploads, clips, thumbnails and the SQLite file all persist.
+      mountPath: /app/storage
+      sizeGB: 10
+    envVars:
+      - key: TRANSCRIPTION_BACKEND
+        # Explicit rather than "auto": if the key is missing, fail loudly
+        # instead of silently falling back to a backend that isn't installed.
+        value: groq
+      - key: ANALYSIS_BACKEND
+        value: groq
+      - key: GROQ_API_KEYS
+        # Comma-separated. The pool rotates and cools down rate-limited keys.
+        sync: false
+      - key: CORS_ORIGINS
+        # The frontend's public URL, e.g. https://recast-web.onrender.com
+        sync: false
+
+  # ----------------------------------------------------------- FRONTEND ----
+  - type: web
+    name: recast-web
+    runtime: node
+    plan: starter
+    region: oregon
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_PUBLIC_API_URL
+        # Inlined into the JS bundle at BUILD time, not read at runtime —
+        # changing it requires a rebuild, not just a restart.
+        sync: false

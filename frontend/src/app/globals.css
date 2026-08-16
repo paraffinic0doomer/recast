@@ -1,0 +1,273 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  /* Surface sits between the page and a card: used for rails, wells and
+     inset panels, so depth reads as three layers instead of two. */
+  --color-surface: var(--surface);
+  --color-surface-foreground: var(--surface-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-glow: var(--glow);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ---------------------------------------------------------------------------
+   Neural Editorial Workspace
+
+   A dark-first workspace palette. Depth comes from four flat greys stacked
+   background -> surface -> card -> border rather than from gradients, and a
+   single indigo carries every AI signal: primary actions, active nav, live
+   pipeline stages, and metric emphasis. Green and amber are reserved strictly
+   for state (done / attention) so they never read as decoration.
+
+   Order matters: `:root` and `.dark` have identical specificity, so the block
+   written last wins. Light is declared first and dark overrides it.
+--------------------------------------------------------------------------- */
+
+/* Light companion: the same structure and the same indigo, on cool paper.
+   Kept so the mode switcher stays honest, but dark is the product's face. */
+:root {
+  --background: #f7f8fb;
+  --surface: #ffffff;
+  --surface-foreground: #11141b;
+  --card: #ffffff;
+  --card-foreground: #11141b;
+  --foreground: #11141b;
+  --popover: #ffffff;
+  --popover-foreground: #11141b;
+
+  --primary: #5457e5;
+  --primary-foreground: #ffffff;
+  --glow: #6366f1;
+
+  --secondary: #eef0f6;
+  --secondary-foreground: #11141b;
+  --muted: #f1f3f8;
+  --muted-foreground: #5c6478;
+  --accent: #eef0f6;
+  --accent-foreground: #11141b;
+
+  --success: #059669;
+  --success-foreground: #ffffff;
+  --warning: #b45309;
+  --warning-foreground: #ffffff;
+  --destructive: #dc2626;
+
+  --border: #e3e6ee;
+  --input: #d7dbe6;
+  --ring: #6366f1;
+
+  --chart-1: #5457e5;
+  --chart-2: #818cf8;
+  --chart-3: #059669;
+  --chart-4: #d97706;
+  --chart-5: #5c6478;
+
+  --radius: 0.75rem;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #11141b;
+  --sidebar-primary: #5457e5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f3f8;
+  --sidebar-accent-foreground: #11141b;
+  --sidebar-border: #e3e6ee;
+  --sidebar-ring: #6366f1;
+}
+
+.dark {
+  --background: #0b0d12;
+  --surface: #121722;
+  --surface-foreground: #e7eaf3;
+  --card: #171c27;
+  --card-foreground: #e7eaf3;
+  --foreground: #e7eaf3;
+  --popover: #171c27;
+  --popover-foreground: #e7eaf3;
+
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --glow: #818cf8;
+
+  --secondary: #232937;
+  --secondary-foreground: #e7eaf3;
+  --muted: #1c2230;
+  --muted-foreground: #98a1b8;
+  --accent: #232937;
+  --accent-foreground: #e7eaf3;
+
+  --success: #10b981;
+  --success-foreground: #04150e;
+  --warning: #f59e0b;
+  --warning-foreground: #1a1102;
+  --destructive: #f2555a;
+
+  --border: #252b38;
+  --input: #2c3446;
+  --ring: #6366f1;
+
+  --chart-1: #6366f1;
+  --chart-2: #818cf8;
+  --chart-3: #10b981;
+  --chart-4: #f59e0b;
+  --chart-5: #98a1b8;
+
+  --sidebar: #0e1119;
+  --sidebar-foreground: #e7eaf3;
+  --sidebar-primary: #6366f1;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1b2130;
+  --sidebar-accent-foreground: #e7eaf3;
+  --sidebar-border: #1e2431;
+  --sidebar-ring: #6366f1;
+
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  html {
+    @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Headings share the UI face; hierarchy comes from size and tracking, which
+     is what makes a workspace read as precise rather than decorative. */
+  h1,
+  h2,
+  h3,
+  [data-slot="card-title"] {
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  h1 {
+    letter-spacing: -0.03em;
+  }
+  p {
+    line-height: 1.6;
+  }
+  /* Long generated copy scrolls inside panels; keep those bars unobtrusive. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--input);
+    background-clip: content-box;
+  }
+}
+
+@layer components {
+  /* The one piece of motion in the system: a slow indigo sweep that marks
+     "the AI is working on this right now". Used on the active pipeline stage
+     and the armed dropzone, nowhere else. */
+  .ai-shimmer {
+    background-image: linear-gradient(
+      100deg,
+      transparent 20%,
+      color-mix(in oklab, var(--primary) 22%, transparent) 50%,
+      transparent 80%
+    );
+    background-size: 200% 100%;
+    animation: ai-sweep 2.4s ease-in-out infinite;
+  }
+
+  @keyframes ai-sweep {
+    from {
+      background-position: 180% 0;
+    }
+    to {
+      background-position: -80% 0;
+    }
+  }
+
+  /* Soft focus halo behind an active AI element. */
+  .ai-glow {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--primary) 40%, transparent),
+      0 0 28px -8px color-mix(in oklab, var(--glow) 60%, transparent);
+  }
+
+  @keyframes ai-pulse {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.45;
+      transform: scale(0.82);
+    }
+  }
+
+  .ai-pulse {
+    animation: ai-pulse 2s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-shimmer,
+  .ai-pulse {
+    animation: none;
+  }
+}

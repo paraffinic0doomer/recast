@@ -1,0 +1,35 @@
+# Python
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.egg-info/
+backend/.env
+backend/groq_keys.txt
+backend/.pytest_cache/
+
+# Storage (runtime data, not source)
+backend/storage/uploads/*
+backend/storage/audio/*
+backend/storage/clips/*
+backend/storage/thumbnails/*
+backend/storage/subtitles/*
+backend/storage/*.db
+!backend/storage/uploads/.gitkeep
+!backend/storage/audio/.gitkeep
+!backend/storage/clips/.gitkeep
+!backend/storage/thumbnails/.gitkeep
+!backend/storage/subtitles/.gitkeep
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env*.local
+
+# Sample data (large media, not source)
+sample_data/*
+!sample_data/README.md
+
+# Editors / OS
+.DS_Store
+*.log

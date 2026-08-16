@@ -1,0 +1,11 @@
+# Never bake secrets or 1.6GB of local media into the image.
+.env
+groq_keys.txt
+storage/
+.venv/
+tests/
+__pycache__/
+**/__pycache__/
+.pytest_cache/
+*.log
+*.db

@@ -1,0 +1,18 @@
+# Production dependencies for the hosted API.
+#
+# Deliberately smaller than requirements.txt:
+#   - faster-whisper is omitted. It is imported lazily and only used by
+#     TRANSCRIPTION_BACKEND=local; hosted deploys transcribe via Groq, and the
+#     CTranslate2 runtime it pulls in costs hundreds of MB of image size and
+#     more RAM than a small instance has.
+#   - pytest is a test dependency and has no place in a runtime image.
+#
+# Keep the shared pins in sync with requirements.txt when upgrading.
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20
+pydantic==2.10.4
+pydantic-settings==2.7.1
+sqlalchemy==2.0.36
+openai==1.59.6
+python-dotenv==1.0.1
