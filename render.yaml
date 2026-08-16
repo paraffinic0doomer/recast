@@ -4,19 +4,17 @@
 # FFmpeg) and a Node web service for the Next.js frontend.
 #
 # ---------------------------------------------------------------------------
-# THIS FILE IS CONFIGURED FOR THE FREE TIER so it deploys without a payment
-# method on file. Render requires a card to enable ANY paid resource, even when
-# account credit would cover the bill.
+# The API runs on a paid instance because it needs three things Free cannot
+# give it: ~2GB RAM so FFmpeg can re-encode 1080p, a persistent disk so
+# uploads/clips/database survive a restart, and no spin-down so the first
+# request after an idle period is not a cold start.
 #
-# The cost of that: Free instances have no persistent disk, so every deploy and
-# every wake-from-sleep starts with empty storage. Uploads, rendered clips,
-# thumbnails and the SQLite database do not survive a restart. The app works
-# fine within a single session — upload and demo without redeploying.
+# The frontend stays on Free: it is stateless, and production traffic is
+# served from Vercel anyway. Delete the service entirely if you do not want
+# the Render copy.
 #
-# TO UPGRADE once a card is added (recommended for anything beyond a demo):
-#   1. change both `plan: free` lines to `plan: starter`
-#   2. uncomment the `disk:` block on recast-api
-# That is the whole change — the mount path already matches STORAGE_DIR.
+# Render requires a payment method to enable any paid resource; account
+# credit is applied to the invoice, it does not unlock the resource.
 # ---------------------------------------------------------------------------
 #
 # The two URL variables are marked `sync: false` on purpose. Render has no way
@@ -29,19 +27,18 @@ services:
   - type: web
     name: recast-api
     runtime: docker
-    plan: free
+    plan: starter
     autoDeploy: true
     region: oregon
     rootDir: backend
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
-    # Persistent storage — requires a paid instance. Uncomment with `starter`.
-    # disk:
-    #   name: recast-storage
-    #   # Matches STORAGE_DIR in app/core/config.py (BASE_DIR is /app in the
-    #   # image), so uploads, clips, thumbnails and the SQLite file all persist.
-    #   mountPath: /app/storage
-    #   sizeGB: 10
+    disk:
+      name: recast-storage
+      # Matches STORAGE_DIR in app/core/config.py (BASE_DIR is /app in the
+      # image), so uploads, clips, thumbnails and the SQLite file all persist.
+      mountPath: /app/storage
+      sizeGB: 10
     envVars:
       - key: TRANSCRIPTION_BACKEND
         # Explicit rather than "auto": if the key is missing, fail loudly
