@@ -46,6 +46,9 @@ class Settings(BaseSettings):
 
     database_url: str = f"sqlite:///{STORAGE_DIR / 'recast.db'}"
     cors_origins: str = "http://localhost:3000"
+    # Shared secret required on every request when set. Leave empty for local
+    # development; set it before exposing the API through a tunnel.
+    access_key: str = ""
     # Burn transcript captions into generated shorts (watched on mute).
     burn_subtitles: bool = True
     ffmpeg_bin: str = "ffmpeg"

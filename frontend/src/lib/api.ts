@@ -13,10 +13,21 @@ import type {
   TranscriptResponse,
 } from "@/types/project";
 
+import { getAccessKey, clearAccessKey } from "@/lib/access";
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+/**
+ * Absolute URL for a stored media file.
+ *
+ * The key travels as a query parameter here, not a header: <video src> and
+ * <img src> are fetched by the browser itself and cannot carry custom headers.
+ */
 export function mediaUrl(path: string): string {
-  return `${API_URL}${path}`;
+  const key = getAccessKey();
+  if (!key) return `${API_URL}${path}`;
+  const sep = path.includes("?") ? "&" : "?";
+  return `${API_URL}${path}${sep}k=${encodeURIComponent(key)}`;
 }
 
 export class ApiError extends Error {
@@ -41,13 +52,24 @@ export class ApiError extends Error {
  */
 const TUNNEL_HEADERS = { "bypass-tunnel-reminder": "true" };
 
-function withTunnelHeaders(init?: RequestInit): RequestInit {
-  return { ...init, headers: { ...TUNNEL_HEADERS, ...(init?.headers ?? {}) } };
+function withHeaders(init?: RequestInit): RequestInit {
+  const key = getAccessKey();
+  return {
+    ...init,
+    headers: {
+      ...TUNNEL_HEADERS,
+      ...(key ? { "X-Access-Key": key } : {}),
+      ...(init?.headers ?? {}),
+    },
+  };
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_URL}/api${path}`, withTunnelHeaders(init));
+  const res = await fetch(`${API_URL}/api${path}`, withHeaders(init));
   if (!res.ok) {
+    // A rejected key is stale or wrong; drop it so the gate reappears rather
+    // than leaving every subsequent request failing silently.
+    if (res.status === 401) clearAccessKey();
     const body = await res.json().catch(() => null);
     throw new ApiError(body?.detail ?? res.statusText, res.status);
   }
@@ -128,7 +150,7 @@ export const api = {
 
   /** Direct URL that serves the clip as a file attachment. */
   clipDownloadUrl: (id: string, clipId: string) =>
-    `${API_URL}/api/projects/${id}/clips/${clipId}/download`,
+    mediaUrl(`/api/projects/${id}/clips/${clipId}/download`),
 
   deleteProject: (id: string) =>
     request<void>(`/projects/${id}`, { method: "DELETE" }),
