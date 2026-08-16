@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppSidebar } from "@/components/app-sidebar";
-import { AccessGate } from "@/components/access-gate";
 import "./globals.css";
 
 /**
@@ -56,12 +55,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full bg-background text-foreground">
         <ThemeProvider>
           <TooltipProvider>
-            {/* Nothing renders until the key is accepted on a gated backend. */}
-            <AccessGate>
-              <AppSidebar />
-              {/* The rail is fixed, so the workspace is inset by its width. */}
-              <div className="flex min-h-dvh flex-col lg:pl-64">{children}</div>
-            </AccessGate>
+            <AppSidebar />
+            {/* The rail is fixed, so the workspace is inset by its width. */}
+            <div className="flex min-h-dvh flex-col lg:pl-64">{children}</div>
           </TooltipProvider>
           <Toaster />
         </ThemeProvider>

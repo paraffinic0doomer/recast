@@ -7,7 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api import health, projects, upload
-from app.core.access import AccessKeyMiddleware
 from app.core.config import CLIPS_DIR, THUMBNAILS_DIR, UPLOADS_DIR, settings
 from app.core.database import Base, engine, ensure_schema
 from app.core.logging import configure_logging
@@ -25,18 +24,6 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="RECAST API", version="0.1.0", lifespan=lifespan)
-
-# Order matters: this is added first, so it runs *inside* CORS. A rejected
-# request still gets CORS headers and the browser can read the 401 rather than
-# reporting an opaque network failure.
-if settings.access_key:
-    app.add_middleware(AccessKeyMiddleware, access_key=settings.access_key)
-    logger.info("Access key required: API is gated.")
-else:
-    logger.warning(
-        "ACCESS_KEY is not set: the API is open to anyone who can reach it. "
-        "Set it in backend/.env before exposing this instance publicly."
-    )
 
 app.add_middleware(
     CORSMiddleware,

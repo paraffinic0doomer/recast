@@ -1,13 +1,6 @@
-import os
 import subprocess
 from collections.abc import Generator
 from pathlib import Path
-
-# The access-key gate is configured from the environment at import time, and a
-# developer's .env may set one for a publicly exposed instance. Tests exercise
-# the routes directly and must not depend on that, so clear it before anything
-# imports the app. Environment variables win over .env in pydantic-settings.
-os.environ["ACCESS_KEY"] = ""
 
 import pytest
 from fastapi.testclient import TestClient
