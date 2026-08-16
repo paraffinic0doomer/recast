@@ -33,6 +33,14 @@ ASPECT_TOLERANCE = 0.02
 COPY_DURATION_TOLERANCE = 0.75
 CRF = "20"
 PRESET = "veryfast"
+# Backdrop blur is computed at 1/4 resolution; sigma scales with it so the
+# apparent radius stays the same. See _vertical_filter.
+BLUR_DIVISOR = 4
+BLUR_SIGMA = 6
+# x264 allocates per-thread frame buffers. Small hosts (a 512MB container) run
+# out of memory long before they run out of cores, so cap it rather than let
+# ffmpeg spawn one thread per CPU.
+ENCODE_THREADS = "2"
 
 
 @dataclass
@@ -56,11 +64,20 @@ def clip_path_for(clip_id: str) -> Path:
 
 
 def _vertical_filter() -> str:
-    """Blurred-background 9:16 canvas. Keeps the whole frame visible."""
+    """Blurred-background 9:16 canvas. Keeps the whole frame visible.
+
+    The backdrop is blurred at a quarter resolution and then scaled back up.
+    A heavy gaussian on a full 1080x1920 frame is the most memory-hungry step
+    in the whole pipeline, and blurring small then upscaling is visually
+    indistinguishable -- the result is a blur either way. Sigma is divided by
+    the same factor as the resolution so the apparent radius is unchanged.
+    """
+    bg_w, bg_h = VERTICAL_WIDTH // BLUR_DIVISOR, VERTICAL_HEIGHT // BLUR_DIVISOR
     return (
         "[0:v]split=2[bg][fg];"
-        f"[bg]scale={VERTICAL_WIDTH}:{VERTICAL_HEIGHT}:force_original_aspect_ratio=increase,"
-        f"crop={VERTICAL_WIDTH}:{VERTICAL_HEIGHT},gblur=sigma=25[bgblur];"
+        f"[bg]scale={bg_w}:{bg_h}:force_original_aspect_ratio=increase,"
+        f"crop={bg_w}:{bg_h},gblur=sigma={BLUR_SIGMA},"
+        f"scale={VERTICAL_WIDTH}:{VERTICAL_HEIGHT}[bgblur];"
         f"[fg]scale={VERTICAL_WIDTH}:{VERTICAL_HEIGHT}:force_original_aspect_ratio=decrease[fgscaled];"
         "[bgblur][fgscaled]overlay=(W-w)/2:(H-h)/2,setsar=1"
     )
@@ -150,6 +167,8 @@ def _encode(
     if vf:
         command += ["-filter_complex", vf]
     command += [
+        "-threads",
+        ENCODE_THREADS,
         "-c:v",
         "libx264",
         "-preset",
