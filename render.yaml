@@ -30,6 +30,7 @@ services:
     name: recast-api
     runtime: docker
     plan: free
+    autoDeploy: true
     region: oregon
     rootDir: backend
     dockerfilePath: ./Dockerfile
@@ -60,6 +61,7 @@ services:
     name: recast-web
     runtime: node
     plan: free
+    autoDeploy: true
     region: oregon
     rootDir: frontend
     buildCommand: npm ci && npm run build
