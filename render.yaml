@@ -3,6 +3,22 @@
 # Two services: a Dockerised FastAPI API (Docker because the pipeline needs
 # FFmpeg) and a Node web service for the Next.js frontend.
 #
+# ---------------------------------------------------------------------------
+# THIS FILE IS CONFIGURED FOR THE FREE TIER so it deploys without a payment
+# method on file. Render requires a card to enable ANY paid resource, even when
+# account credit would cover the bill.
+#
+# The cost of that: Free instances have no persistent disk, so every deploy and
+# every wake-from-sleep starts with empty storage. Uploads, rendered clips,
+# thumbnails and the SQLite database do not survive a restart. The app works
+# fine within a single session — upload and demo without redeploying.
+#
+# TO UPGRADE once a card is added (recommended for anything beyond a demo):
+#   1. change both `plan: free` lines to `plan: starter`
+#   2. uncomment the `disk:` block on recast-api
+# That is the whole change — the mount path already matches STORAGE_DIR.
+# ---------------------------------------------------------------------------
+#
 # The two URL variables are marked `sync: false` on purpose. Render has no way
 # to interpolate one service's full https URL into another's env var, and each
 # side needs the other's address, so they are filled in by hand once after the
@@ -13,17 +29,18 @@ services:
   - type: web
     name: recast-api
     runtime: docker
-    plan: starter # Free has no persistent disk; see DEPLOY.md.
+    plan: free
     region: oregon
     rootDir: backend
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
-    disk:
-      name: recast-storage
-      # Matches STORAGE_DIR in app/core/config.py (BASE_DIR is /app in the
-      # image), so uploads, clips, thumbnails and the SQLite file all persist.
-      mountPath: /app/storage
-      sizeGB: 10
+    # Persistent storage — requires a paid instance. Uncomment with `starter`.
+    # disk:
+    #   name: recast-storage
+    #   # Matches STORAGE_DIR in app/core/config.py (BASE_DIR is /app in the
+    #   # image), so uploads, clips, thumbnails and the SQLite file all persist.
+    #   mountPath: /app/storage
+    #   sizeGB: 10
     envVars:
       - key: TRANSCRIPTION_BACKEND
         # Explicit rather than "auto": if the key is missing, fail loudly
@@ -42,7 +59,7 @@ services:
   - type: web
     name: recast-web
     runtime: node
-    plan: starter
+    plan: free
     region: oregon
     rootDir: frontend
     buildCommand: npm ci && npm run build

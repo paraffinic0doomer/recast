@@ -9,21 +9,49 @@ Two services, defined in [`render.yaml`](./render.yaml):
 
 ---
 
-## Before you start: read this
+## Before you start: storage, and why it matters
 
-**Persistent storage is not optional.** RECAST writes uploads, extracted audio,
-rendered clips, thumbnails, subtitles and a SQLite database to disk. Render's
-filesystem is ephemeral — without a disk, **every deploy and every restart wipes
-all projects**. Render disks require a paid instance type, so `render.yaml` sets
-`plan: starter` on the API.
+`render.yaml` ships configured for the **Free tier**, so it deploys with no
+payment method on file. Render requires a card to enable any paid resource,
+even when account credit would cover the bill.
 
-If you deploy the API on **Free**, expect:
+### What the app writes to disk
 
-- all data lost on each redeploy and on every wake-from-sleep,
-- the service sleeping after ~15 minutes idle, with a slow cold start,
-- 512 MB RAM, which FFmpeg re-encoding a 1080p clip will strain.
+Every pipeline stage produces real files:
 
-For a live demo, put at least the API on Starter.
+| Path | Contents |
+| --- | --- |
+| `storage/uploads/` | the source video, up to 500 MB each |
+| `storage/audio/` | 16 kHz mono audio extracted for transcription |
+| `storage/clips/` | rendered 9:16 shorts with burned-in captions |
+| `storage/thumbnails/` | frames extracted for thumbnail concepts |
+| `storage/subtitles/` | generated `.ass` caption files |
+| `storage/recast.db` | SQLite: projects, transcripts, Content DNA, campaigns |
+
+None of it is in memory or in an external service.
+
+### What Free costs you
+
+A Render container has a writable filesystem, so the app runs correctly — but
+that filesystem is **ephemeral**. It resets on every deploy, every restart, and
+every wake-from-sleep. Concretely:
+
+- upload a video, generate a campaign, show it — all fine **within one session**
+- the container restarts → every project, clip and transcript is gone
+
+Also on Free: the service sleeps after ~15 minutes idle with a slow cold start,
+and 512 MB RAM is tight for FFmpeg re-encoding 1080p footage. Demo with short
+clips.
+
+### Upgrading later
+
+Once a card is on file, two edits in `render.yaml`:
+
+1. change both `plan: free` lines to `plan: starter`
+2. uncomment the `disk:` block on `recast-api`
+
+The mount path already matches `STORAGE_DIR`, so nothing in the code changes.
+Roughly $7/mo per instance plus ~$0.25/GB/mo for the disk.
 
 ---
 
