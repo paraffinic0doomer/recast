@@ -29,8 +29,24 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Sent on every request so a tunnelled backend answers with JSON.
+ *
+ * When the API is exposed through localtunnel — the usual setup when the
+ * frontend is hosted but the pipeline runs on a local machine, because FFmpeg
+ * needs real CPU and large uploads exceed most proxies' body limits — the
+ * service returns an HTML interstitial to anything that looks like a browser.
+ * This header opts out of it. Every other host ignores an unknown header, so
+ * it costs nothing when the API is hosted normally.
+ */
+const TUNNEL_HEADERS = { "bypass-tunnel-reminder": "true" };
+
+function withTunnelHeaders(init?: RequestInit): RequestInit {
+  return { ...init, headers: { ...TUNNEL_HEADERS, ...(init?.headers ?? {}) } };
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_URL}/api${path}`, init);
+  const res = await fetch(`${API_URL}/api${path}`, withTunnelHeaders(init));
   if (!res.ok) {
     const body = await res.json().catch(() => null);
     throw new ApiError(body?.detail ?? res.statusText, res.status);
